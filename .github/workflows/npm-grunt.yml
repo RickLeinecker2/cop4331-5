@@ -36,7 +36,7 @@ jobs:
       - name: Set up DigitalOcean
         uses: digitalocean/action-doctl@v2
         with:
-          token: ${{ secrets.SSH_KEY }}
+          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
 
 #      - name: Create or update app
 #        run: doctl apps create --spec ./app.yaml || doctl apps update your-app-name --spec ./app.yaml
