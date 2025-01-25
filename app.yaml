@@ -1,0 +1,21 @@
+name: cop4331-5
+services:
+  - name: frontend
+    github:
+      repo: RickLeinecker2/cop4331-5
+      branch: main
+    build_command: npm run build
+    run_command: npm start
+    source_dir: /frontend
+    environment_slug: node-js
+
+  - name: backend
+    github:
+      repo: RickLeinecker2/cop4331-5
+      branch: main
+    build_command: npm install
+    run_command: node server.js
+    source_dir: /backend
+    environment_slug: node-js
+
+region: nyc1
