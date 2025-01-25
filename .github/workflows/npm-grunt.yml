@@ -41,5 +41,4 @@ jobs:
       - name: Create or update app
         run: doctl apps create --spec ./app.yaml || doctl apps update cop4331-5 --spec ./app.yaml
 
-#      - name: Create or update app
-#        run: doctl apps create --spec ./app.yaml || doctl apps update your-app-name --spec ./app.yaml
+
