@@ -36,7 +36,7 @@ jobs:
         SERVER_USER: ${{ secrets.SSH_USERNAME }}
         SERVER_IP: ${{ secrets.SSH_HOST }}
       run: |
-         scp -i ~/.ssh/id_rsa -r frontend/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/
+         scp -i /root/.ssh/id_rsa -r frontend/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/
          # scp -i ~/myssh -r frontend/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/
 
     - name: Install dependencies for backend
