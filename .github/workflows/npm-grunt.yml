@@ -26,9 +26,9 @@ jobs:
       - name: Install dependencies and build frontend
         run: |
           cd frontend
-          npm i --save-dev @types/node
           npm ci
           npm run build
+          ls -la dist # Debugging step to verify build folder
 
       - name: Archive build artifacts
         run: |
@@ -38,8 +38,9 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-            name: frontend-dist
-            path: dist/frontend
+          name: frontend-dist
+          path: dist/frontend
+          if-no-files-found: error  # Ensure this fails if the directory is empty
 
   deploy:
     runs-on: ubuntu-latest
