@@ -3,22 +3,26 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - main  # Adjust to the branch you use
   pull_request:
     branches:
       - main
+
 jobs:
-  build:
-    runs-on: self-hosted
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      # Checkout the repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22.13.1'
+          node-version: '22.13.1' 
+          cache: 'npm'
 
       - name: Frontend build
         run: |
@@ -31,7 +35,7 @@ jobs:
       - name: Backend build
         run: |
           npm install
-
+          ssh root@cop4331-5.com 'sudo systemctl restart express-server
   # deploy:
   #   needs: build
   #   runs-on: self-hosted
