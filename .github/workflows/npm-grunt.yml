@@ -46,4 +46,4 @@ jobs:
         run: |
           scp -r ./frontend/dist/ root@cop4331-5.com:/var/www/html/
           scp -r ./ root@cop4331-5.com:/var/cardsServer/
-          ssh root@cop4331-5.com 'sudo systemctl restart express-server'
+          ssh root@cop4331-5.com 'sudo systemctl restart express-server
