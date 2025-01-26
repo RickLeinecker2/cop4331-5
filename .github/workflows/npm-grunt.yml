@@ -1,81 +1,49 @@
-name: NodeJS with Grunt
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20.x]
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '22'
 
-      - name: Install dependencies and build frontend
+      - name: Frontend build
         run: |
           cd frontend
           npm i --save-dev @types/node
-          npm ci
+          npm install
           npm run build
-          ls -la dist # Debugging step to verify build folder
 
-      - name: Archive build artifacts
+      - name: Backend build
         run: |
-          mkdir -p dist
-          cp -R frontend/dist ./dist
-        # Save the dist directory for the next job
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: frontend-dist
-          path: dist/frontend
-          if-no-files-found: error  # Ensure this fails if the directory is empty
+          cd ../cop4331-5
+          npm install
 
   deploy:
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: frontend-dist
-
-      - name: Set up DigitalOcean CLI
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
-
-      - name: Transfer frontend to server
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Deploy Application
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r dist/frontend/* root@cop4331-5.com:/var/www/html/
-
-      - name: Deploy backend server
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./* root@cop4331-5.com:/var/cardsServer/
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@cop4331-5.com "sudo systemctl restart express-server"
+          scp -r ./frontend/dist/ root@cop4331-5.com:/var/www/html/
+          scp -r ./ root@cop4331-5.com:/var/cardsServer/
+          ssh root@cop4331-5.com 'sudo systemctl restart express-server'
