@@ -32,17 +32,17 @@ jobs:
         run: |
           npm install
 
-  deploy:
-    needs: build
-    runs-on: self-hosted
-    if: github.ref == 'refs/heads/main'
+  # deploy:
+  #   needs: build
+  #   runs-on: self-hosted
+  #   if: github.ref == 'refs/heads/main'
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
 
-      # - name: Deploy Application
-      #   run: |
-      #     scp -r ./frontend/dist/ root@cop4331-5.com:/var/www/html/
-      #     scp -r ./ root@cop4331-5.com:/var/cardsServer/
-      #     ssh root@cop4331-5.com 'sudo systemctl restart express-server
+  #     - name: Deploy Application
+  #       run: |
+  #         scp -r ./frontend/dist/ root@cop4331-5.com:/var/www/html/
+  #         scp -r ./ root@cop4331-5.com:/var/cardsServer/
+  #         ssh root@cop4331-5.com 'sudo systemctl restart express-server
