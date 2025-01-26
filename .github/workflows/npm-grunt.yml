@@ -1,44 +1,49 @@
-name: NodeJS with Grunt
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20.x]
+    runs-on: self-hosted
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Build
-      run: |
-        cd frontend
-        npm i --save-dev @types/node
-        npm run build
-        
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Set up DigitalOcean
-        uses: digitalocean/action-doctl@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+          node-version: '22'
 
-      - name: Create or update app
-        run: doctl apps create --spec ./app.yaml || doctl apps update cop4331-5 --spec ./app.yaml
+      - name: Frontend build
+        run: |
+          cd frontend
+          npm i --save-dev @types/node
+          npm install
+          npm run build
 
+      - name: Backend build
+        run: |
+          cd ..
+          npm install
 
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy Application
+        run: |
+          scp -r ./frontend/dist/ root@cop4331-5.com:/var/www/html/
+          scp -r ./ root@cop4331-5.com:/var/cardsServer/
+          ssh root@cop4331-5.com 'sudo systemctl restart express-server'
