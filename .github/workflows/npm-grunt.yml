@@ -1,55 +1,62 @@
-name: CI/CD Pipeline
+name: CI/CD 
 
 on:
   push:
     branches:
-      - main  # Adjust to the branch you use
-  pull_request:
-    branches:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
+    name: Deploy to DigitalOcean Server
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      # Set up Node.js environment
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.13.1'
-          cache: 'npm'
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 22.13.1
 
-      # Frontend build
-      - name: Frontend build
-        run: |
-          cd frontend
-          npm i --save-dev @types/node
-          npm install
-          npm run build
-          cd ..
+    - name: Install dependencies for frontend
+      run: |
+        cd frontend
+        npm ci
 
-      # Backend build and deployment
-      - name: Backend build
-        run: |
-          npm install
-          ssh root@cop4331-5.com 'sudo systemctl restart express-server'
+    - name: Build Frontend
+      run: |
+        cd frontend
+        npm i --save-dev @types/node
+        npm run build
 
-  # deploy:
-  #   needs: build
-  #   runs-on: self-hosted
-  #   if: github.ref == 'refs/heads/main'
+    - name: Transfer Frontend Files to Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+        SERVER_USER: ${{ secrets.SSH_USERNAME }}
+        SERVER_IP: ${{ secrets.SSH_HOST }}
+      run: |
+        scp -i ~/.ssh/id_rsa -r frontend/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/
 
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+    - name: Install dependencies for backend
+      run: |
+        npm ci
 
-  #     - name: Deploy Application
-  #       run: |
-  #         scp -r ./frontend/dist/ root@cop4331-5.com:/var/www/html/
-  #         scp -r ./ root@cop4331-5.com:/var/cardsServer/
-  #         ssh root@cop4331-5.com 'sudo systemctl restart express-server
+    - name: Transfer Backend Files to Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+        SERVER_USER: ${{ secrets.SSH_USERNAME }}
+        SERVER_IP: ${{ secrets.SSH_HOST }}
+      run: |
+        scp -i ~/.ssh/id_rsa -r * $SERVER_USER@$SERVER_IP:/var/www/server/
+
+    - name: Restart Backend Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+      run: |
+        ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_IP << 'EOF'
+        pm2 stop server || true
+        pm2 start /var/www/server/server.js
+        EOF
