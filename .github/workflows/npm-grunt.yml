@@ -26,6 +26,7 @@ jobs:
       - name: Install dependencies and build frontend
         run: |
           cd frontend
+          npm i --save-dev @types/node
           npm ci
           npm run build
           ls -la dist # Debugging step to verify build folder
