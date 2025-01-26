@@ -41,6 +41,6 @@ jobs:
       - name: Create or update app
         # run: doctl apps create --spec ./app.yaml || doctl apps update cop4331-5 --spec ./app.yaml
         run: |
-            scp -r ./frontend/dist/ root@cop4331-5.com:/var/www/html/
+            scp -r frontend/dist/ root@cop4331-5.com:/var/www/html/
             scp -r ./ root@cop4331-5.com:/var/cardsServer/
             ssh root@cop4331-5.com 'sudo systemctl restart express-server'
