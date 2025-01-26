@@ -26,14 +26,19 @@ jobs:
       - name: Install dependencies and build frontend
         run: |
           cd frontend
-          npm i --save-dev @types/node
           npm ci
           npm run build
 
       - name: Archive build artifacts
         run: |
           mkdir -p dist
-          cp -R frontend/dist ./dist/frontend
+          cp -R frontend/dist ./dist
+        # Save the dist directory for the next job
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+            name: frontend-dist
+            path: dist/frontend
 
   deploy:
     runs-on: ubuntu-latest
@@ -42,6 +47,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-dist
 
       - name: Set up DigitalOcean CLI
         uses: digitalocean/action-doctl@v2
