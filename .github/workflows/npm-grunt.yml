@@ -32,7 +32,7 @@ jobs:
 
     - name: Transfer Frontend Files to Server
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
         SERVER_USER: ${{ secrets.SSH_USERNAME }}
         SERVER_IP: ${{ secrets.SSH_HOST }}
       run: |
@@ -44,7 +44,7 @@ jobs:
 
     - name: Transfer Backend Files to Server
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
         SERVER_USER: ${{ secrets.SSH_USERNAME }}
         SERVER_IP: ${{ secrets.SSH_HOST }}
       run: |
@@ -52,9 +52,9 @@ jobs:
 
     - name: Restart Backend Server
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SERVER_USER: ${{ secrets.SERVER_USER }}
-        SERVER_IP: ${{ secrets.SERVER_IP }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+        SERVER_USER: ${{ secrets.SSH_USERNAME }}
+        SERVER_IP: ${{ secrets.SSH_HOST }}
       run: |
         ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_IP << 'EOF'
         pm2 stop server || true
