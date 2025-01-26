@@ -1,42 +1,63 @@
-name: NodeJS with Grunt
+name: CI/CD 
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  build:
+  deploy:
+    name: Deploy to DigitalOcean Server
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 22.13.1
 
-    - name: Build
+    - name: Install dependencies for frontend
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Build Frontend
       run: |
         cd frontend
         npm i --save-dev @types/node
         npm run build
-        
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
 
-    steps:
-      - name: Set up DigitalOcean
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}
+    - name: Transfer Frontend Files to Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+        SERVER_USER: ${{ secrets.SSH_USERNAME }}
+        SERVER_IP: ${{ secrets.SSH_HOST }}
+      run: |
+         scp -i /root/.ssh/id_rsa -r frontend/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/
+         # scp -i ~/myssh -r frontend/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/
 
-      - name: Create or update app
-        run: doctl apps create --spec app.yaml || doctl apps update cop4331-5 --spec app.yaml
+    - name: Install dependencies for backend
+      run: |
+        npm ci
+
+    - name: Transfer Backend Files to Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+        SERVER_USER: ${{ secrets.SSH_USERNAME }}
+        SERVER_IP: ${{ secrets.SSH_HOST }}
+      run: |
+        scp -i ~/.ssh/id_rsa -r * $SERVER_USER@$SERVER_IP:/var/www/server/
+
+    - name: Restart Backend Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+        SERVER_USER: ${{ secrets.SSH_USERNAME }}
+        SERVER_IP: ${{ secrets.SSH_HOST }}
+      run: |
+        ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_IP << 'EOF'
+        pm2 stop server || true
+        pm2 start /var/www/server/server.js
+        EOF
