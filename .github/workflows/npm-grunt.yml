@@ -30,7 +30,7 @@ jobs:
 
       - name: Backend build
         run: |
-          cd ..
+          cd ../cop4331-5
           npm install
 
   deploy:
