@@ -53,11 +53,9 @@ jobs:
 
         # Restart backend server
         echo "Restarting backend..."
-         # if pm2 list | grep -q express-server; then
          pm2 restart express-server
-         # else
-         # pm2 start $CARDS_SERVER_PATH/server.js --name express-server --watch
-         # fi
+         pm2 save
+       
 
     - name: Confirm deployment
       run: |
