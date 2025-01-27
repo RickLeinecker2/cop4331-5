@@ -54,7 +54,7 @@ jobs:
         # Restart backend server
     - name: Restart Backend Service
       run: |
-          cd $CARDS_SERVER_PATH
+          cd /var/cardsServer
           pm2 stop express-server || true
           pm2 delete express-server || true
           pm2 start server.js --name express-server 
