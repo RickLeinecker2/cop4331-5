@@ -23,35 +23,39 @@ jobs:
     - name: Build frontend
       run: |
         cd frontend
-        npm i --save-dev @types/node
         npm ci
         npm run build
 
     - name: Build backend
       run: |
-        npm install
+        cd backend
+        npm ci
 
     - name: Deploy files and restart services
       run: |
         # Define paths
         FRONTEND_DIST_PATH="/var/www/mywebsite/_work/cop4331-5/cop4331-5/frontend/dist"
-        BACKEND_PATH="/var/www/mywebsite/_work/cop4331-5/cop4331-5/"
+        BACKEND_PATH="/var/www/mywebsite/_work/cop4331-5/cop4331-5"
         HTML_PATH="/var/www/html"
         CARDS_SERVER_PATH="/var/cardsServer"
 
-        # Deploy frontend files to /var/www/html
+        # Deploy frontend files
+        echo "Deploying frontend..."
         sudo rsync -av --delete $FRONTEND_DIST_PATH/ $HTML_PATH/
 
-        # Restart nginx server
+        # Restart nginx
+        echo "Restarting nginx..."
         sudo systemctl restart nginx
 
-        # Deploy backend files to /var/cardsServer excluding the frontend folder and keeping .env
+        # Deploy backend files
+        echo "Deploying backend..."
         sudo rsync -av --exclude 'frontend/' --exclude '.env' $BACKEND_PATH/ $CARDS_SERVER_PATH/
 
-        # Restart Node.js server using pm2
-        # pm2 reload all
-        pm2 stop express-server
-        pm2 start express-server
+        # Restart backend server
+        echo "Restarting backend..."
+        pm2 stop express-server || true
+        pm2 delete express-server || true
+        pm2 start $CARDS_SERVER_PATH/server.js --name express-server --watch
 
     - name: Confirm deployment
       run: |
