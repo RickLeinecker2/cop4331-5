@@ -1,4 +1,4 @@
-name: CI/CD 
+name: CI/CD
 
 on:
   push:
@@ -14,20 +14,44 @@ jobs:
     steps:
     - name: Check out repository
       uses: actions/checkout@v3
+
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: 22.13.1
-    - name: Install dependencies for frontend
+
+    - name: Build frontend
       run: |
         cd frontend
         npm i --save-dev @types/node
         npm ci
+        npm run build
 
-    - name: Build Frontend
+    - name: Build backend
       run: |
-        cd frontend
-        npm i --save-dev @types/node
-        npm run build 
+        cd ..
+        npm ci
 
-   
+    - name: Deploy files and restart services
+      run: |
+        # Define paths
+        FRONTEND_DIST_PATH="/var/www/mywebsite/_work/cop4331-5/cop4331-5/frontend/dist"
+        BACKEND_PATH="/var/www/mywebsite/_work/cop4331-5/cop4331-5/"
+        HTML_PATH="/var/www/html"
+        CARDS_SERVER_PATH="/var/cardsServer"
+
+        # Deploy frontend files to /var/www/html
+        sudo rsync -av --delete $FRONTEND_DIST_PATH/ $HTML_PATH/
+
+        # Restart nginx server
+        sudo systemctl restart nginx
+
+        # Deploy backend files to /var/cardsServer excluding the frontend folder and keeping .env
+        sudo rsync -av --exclude 'frontend/' --exclude '.env' $BACKEND_PATH/ $CARDS_SERVER_PATH/
+
+        # Restart Node.js server using pm2
+        pm2 reload all
+
+    - name: Confirm deployment
+      run: |
+        echo "Deployment successful and services restarted."
