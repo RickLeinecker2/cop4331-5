@@ -31,34 +31,4 @@ jobs:
         npm i --save-dev @types/node
         npm run build
 
-    - name: Transfer Frontend Files to Server
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-        SERVER_USER: ${{ secrets.SSH_USERNAME }}
-        SERVER_IP: ${{ secrets.SSH_HOST }}
-      run: |
-         scp -i ~/myssh -r frontend/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/
-         # scp -i ~/myssh -r frontend/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/
-
-    - name: Install dependencies for backend
-      run: |
-        npm ci
-
-    - name: Transfer Backend Files to Server
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-        SERVER_USER: ${{ secrets.SSH_USERNAME }}
-        SERVER_IP: ${{ secrets.SSH_HOST }}
-      run: |
-        scp -i ~/.ssh/id_rsa -r * $SERVER_USER@$SERVER_IP:/var/www/server/
-
-    - name: Restart Backend Server
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-        SERVER_USER: ${{ secrets.SSH_USERNAME }}
-        SERVER_IP: ${{ secrets.SSH_HOST }}
-      run: |
-        ssh -i ~/.ssh/id_rsa $SERVER_USER@$SERVER_IP << 'EOF'
-        pm2 stop server || true
-        pm2 start /var/www/server/server.js
-        EOF
+   
