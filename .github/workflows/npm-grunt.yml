@@ -29,7 +29,6 @@ jobs:
 
     - name: Build backend
       run: |
-        cd ..
         npm install
 
     - name: Deploy files and restart services
