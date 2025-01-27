@@ -52,10 +52,13 @@ jobs:
         sudo rsync -av --exclude 'frontend/' --exclude '.env' $BACKEND_PATH/ $CARDS_SERVER_PATH/
 
         # Restart backend server
-        echo "Restarting backend..."
-         pm2 restart express-server
-         pm2 save
-       
+    - name: Restart Backend Service
+      run: |
+          pm2 stop express-server || true
+          pm2 delete express-server || true
+          pm2 start $CARDS_SERVER_PATH/server.js --name express-server 
+          pm2 save
+
 
     - name: Confirm deployment
       run: |
