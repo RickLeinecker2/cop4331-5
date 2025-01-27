@@ -164,7 +164,7 @@ app.post('/api/login', async (req, res, next) =>
     ln = results[0].LastName;
   }
 
-  var ret = { id:id, firstName:fn, lastName:ln, error:'test'};
+  var ret = { id:id, firstName:fn, lastName:ln, error:''};
   res.status(200).json(ret);
 });
 
@@ -173,7 +173,7 @@ app.post('/api/searchcards', async (req, res, next) =>
   // incoming: userId, search
   // outgoing: results[], error
 
-  var error = '';
+  var error = 'test backend cicid';
 
   const { userId, search } = req.body;
 
