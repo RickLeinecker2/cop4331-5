@@ -55,7 +55,7 @@ jobs:
         echo "Restarting backend..."
         pm2 stop express-server || true
         pm2 delete express-server || true
-        pm2 start $CARDS_SERVER_PATH/server.js --name express-server --watch
+        pm2 start $CARDS_SERVER_PATH/server.js --name express-server --watch 
 
     - name: Confirm deployment
       run: |
