@@ -29,6 +29,6 @@ jobs:
       run: |
         cd frontend
         npm i --save-dev @types/node
-        npm run build
+        npm run build 
 
    
