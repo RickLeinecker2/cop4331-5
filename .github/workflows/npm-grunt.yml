@@ -49,7 +49,9 @@ jobs:
         sudo rsync -av --exclude 'frontend/' --exclude '.env' $BACKEND_PATH/ $CARDS_SERVER_PATH/
 
         # Restart Node.js server using pm2
-        pm2 reload all
+        # pm2 reload all
+        pm2 stop express-server
+        pm2 start express-server
 
     - name: Confirm deployment
       run: |
