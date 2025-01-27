@@ -188,7 +188,7 @@ app.post('/api/searchcards', async (req, res, next) =>
     _ret.push( results[i].Card );
   }
   
-  var ret = {results:_ret, error:error,cicid:"123"};
+  var ret = {results:_ret, error:error,cicid:"true"};
   res.status(200).json(ret);
 });
 
