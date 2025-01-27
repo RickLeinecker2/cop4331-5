@@ -30,7 +30,7 @@ jobs:
     - name: Build backend
       run: |
         cd ..
-        npm ci
+        npm install
 
     - name: Deploy files and restart services
       run: |
