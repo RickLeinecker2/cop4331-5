@@ -2,25 +2,22 @@ name: CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  deploy:
+  build:
     name: Deploy to DigitalOcean Server
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - name: Check out repository
       uses: actions/checkout@v3
-    - name: Print working directory
-      run: pwd
-
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: 22.13.1
-
     - name: Install dependencies for frontend
       run: |
         cd frontend
