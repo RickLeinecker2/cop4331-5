@@ -23,6 +23,7 @@ jobs:
     - name: Build frontend
       run: |
         cd frontend
+        npm i --save-dev @types/node
         npm ci
         npm run build
 
